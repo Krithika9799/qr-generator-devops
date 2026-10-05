@@ -6,9 +6,9 @@ pipeline {
                 echo 'Checking out QR code generator'
             }
         }
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Building QR Generator Application'
+                bat 'docker build -t qr-generator:latest .'
             }
         }
         stage('Test') {
