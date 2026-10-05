@@ -8,12 +8,12 @@ pipeline {
         }
         stage('Check Docker') {
             steps {
-                bat 'docker --version'
+                bat '"%DOCKER_PATH%\\docker.exe" --version'
             }
         }
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t qr-generator:latest .'
+                bat '"%DOCKER_PATH%\\docker.exe" build -t qr-generator:latest .'
             }
         }
         stage('Test') {
