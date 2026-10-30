@@ -21,6 +21,16 @@ pipeline {
                 echo 'Running Application Tests'
             }
         }
+        stage('check Kubernetes access ') {
+            steps {
+                bat '''
+                    whoami
+                    where kubectl
+                    where minikube
+                    kubectl config current-context
+                '''
+            }
+        }
     }
         post {
         success {
