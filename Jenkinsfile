@@ -1,62 +1,81 @@
 pipeline {
     agent any
+
+    environment {
+        DOCKER_PATH = 'C:\\Users\\admin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin'
+        KUBECONFIG = 'C:\\Users\\admin\\.kube\\config'
+        IMAGE_NAME = 'qr-generator:latest'
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out QR code generator'
+                echo 'Checking out QR Generator project'
             }
         }
+
         stage('Check Docker') {
             steps {
                 bat '"%DOCKER_PATH%\\docker.exe" --version'
             }
         }
+
         stage('Build Docker Image') {
             steps {
-                bat '"%DOCKER_PATH%\\docker.exe" build -t qr-generator:latest .'
+                bat '"%DOCKER_PATH%\\docker.exe" build -t %IMAGE_NAME% .'
             }
         }
-        stage("Deploy to Kubernetes") {
-            steps {
-                bat '''
-                    set KUBECONFIG=C:\\Users\\admin\\.kube\\config
 
-                    "C:\\Users\\admin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" save qr-generator:latest -o qr-generator.tar
-
-                    "C:\\Program Files\\Kubernetes\\Minikube\\minikube.exe" image load qr-generator.tar
-
-                    "C:\\Users\\admin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\kubectl.exe" apply -f deployment.yaml
-
-                    "C:\\Users\\admin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\kubectl.exe" apply -f service.yaml
-                '''
-            }
-            
-        }
-        }
         stage('Test') {
             steps {
                 echo 'Running Application Tests'
             }
         }
-        stage('check Kubernetes access ') {
+
+        stage('Check Kubernetes Access') {
             steps {
                 bat '''
-                    set KUBECONFIG=C:\\Users\\admin\\.kube\\config
+                    "%DOCKER_PATH%\\kubectl.exe" get nodes
+                '''
+            }
+        }
 
-                    "C:\\Users\\admin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\kubectl.exe" config current-context
+        stage('Deploy to Kubernetes') {
+            steps {
+                bat '''
+                    "%DOCKER_PATH%\\docker.exe" save %IMAGE_NAME% -o qr-generator.tar
 
-                    "C:\\Users\\admin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\kubectl.exe" get nodes
+                    "C:\\Program Files\\Kubernetes\\Minikube\\minikube.exe" image load qr-generator.tar
 
+                    "%DOCKER_PATH%\\kubectl.exe" apply -f deployment.yaml
+
+                    "%DOCKER_PATH%\\kubectl.exe" apply -f service.yaml
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                bat '''
+                    "%DOCKER_PATH%\\kubectl.exe" rollout status deployment/qr-generator --timeout=120s
+
+                    "%DOCKER_PATH%\\kubectl.exe" get deployments
+
+                    "%DOCKER_PATH%\\kubectl.exe" get pods
+
+                    "%DOCKER_PATH%\\kubectl.exe" get services
                 '''
             }
         }
     }
-        post {
+
+    post {
         success {
-            echo 'QR Generator pipeline completed successfully!'
+            echo 'QR Generator CI/CD pipeline completed successfully!'
         }
 
         failure {
             echo 'Pipeline failed. Please check the logs.'
         }
     }
+}
