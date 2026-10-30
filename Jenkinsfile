@@ -24,10 +24,11 @@ pipeline {
         stage('check Kubernetes access ') {
             steps {
                 bat '''
-                    whoami
-                    dir "C:\\Users\\admin\\.kube"
-                    dir "C:\\Users\\admin\\.minikube\\profiles\\minikube"
-                    type "C:\\Users\\admin\\.kube\\config"
+                    set KUBECONFIG=C:\\Users\\admin\\.kube\\config
+
+                    "C:\\Users\\admin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\kubectl.exe" config current-context
+
+                    "C:\\Users\\admin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\kubectl.exe" get nodes
 
                 '''
             }
