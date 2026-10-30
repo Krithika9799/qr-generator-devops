@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qr-generator
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: qr-generator
+  template:
+    metadata:
+      labels:
+        app: qr-generator
+    spec:
+      containers:
+        - name: qr-generator
+          image: qr-generator:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
