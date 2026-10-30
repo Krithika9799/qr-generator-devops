@@ -24,10 +24,8 @@ pipeline {
         stage('check Kubernetes access ') {
             steps {
                 bat '''
-                    whoami
-                    where kubectl
-                    where minikube
-                    kubectl config current-context
+                    "C:\\Users\\admin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\kubectl.exe" version --client
+                    "C:\\Program Files\\Kubernetes\\Minikube\\minikube.exe" status 
                 '''
             }
         }
